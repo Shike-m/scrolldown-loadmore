@@ -1,5 +1,5 @@
 const BaseUrl = {
-    url: "https://jsonplaceholder.typicode.com/",
+    url: "https://jsonplaceholder.typicode.com/posts",
     apikey:""
 }
 
