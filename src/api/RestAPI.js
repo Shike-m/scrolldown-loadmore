@@ -12,7 +12,6 @@ const RestAPI = {
             requestInfo.data = JSON.stringify(request);
         }
         axios(requestInfo).then(res => {
-            // console.log(res.data);
             callback(res.data);
         });
     },

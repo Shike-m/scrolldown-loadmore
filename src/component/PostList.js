@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import RestAPI from '../api/RestAPI';
 import { List, ListItem, ListItemText } from '@material-ui/core';
+import ProgressDialog from './ProgressDialog';
 
 class PostList extends Component{
     constructor(props) {
@@ -10,7 +11,9 @@ class PostList extends Component{
             reachBottom: false,
             isLoadMore: true,
             posts: [],
-            ids:[]
+            ids: [],
+            loading: false,
+            progressText:"Loading..."
         }
     }
     componentDidMount() {
@@ -21,12 +24,13 @@ class PostList extends Component{
         let posts = this.state.posts;
         let isReachEnd = posts.length >= data.length ? true : false;
         let idList = this.state.ids;
-        
+        isReachEnd && this.setState({
+             loading: false
+        })
         if (data && data.length > 0 && !isReachEnd) {
             let limit = posts.length+30;
             for (let i in data) {
-                if (posts.length >= data.length||posts.length===limit) break;
-                
+                if (posts.length >= data.length || posts.length === limit) break;
                 if (idList.indexOf(data[i]['id']) < 0) {
                     posts.push(data[i]);
                     idList.push(data[i]['id']);
@@ -35,7 +39,8 @@ class PostList extends Component{
             this.setState(()=>({
                 posts: posts,
                 reachBottom: isReachEnd,
-                ids: idList
+                ids: idList,
+                loading: false
             }))
             
         }
@@ -50,13 +55,22 @@ class PostList extends Component{
         let scrollTop = scrollEle.scrollTop;
         let clientHeight = scrollEle.clientHeight;
         
-        if (scrollTop+clientHeight === scrollHeight) {
-            this._loadmorePosts();
+        if (scrollTop + clientHeight === scrollHeight) {
+            this.timer && clearTimeout(this.timer);
+            let self = this;
+            this.setState(() => ({
+                loading: true
+            }));
+            this.timer = setTimeout(() => {
+                self._loadmorePosts();
+            } 
+            , 3000);
+            
         }
         // console.log(scrollTop,scrollHeight,clientHeight);
     }
     _loadmorePosts = () => {
-        setTimeout(RestAPI.getPosts(this.loadPosts), 3000); 
+       RestAPI.getPosts(this.loadPosts); 
     }
 
     render() {
@@ -73,7 +87,8 @@ class PostList extends Component{
                             />
                         </ListItem>
                     ))
-                }  
+                    } 
+                <ProgressDialog open={this.state.loading} text={this.state.progressText}/>    
                 </List>     
            </div>
        )
